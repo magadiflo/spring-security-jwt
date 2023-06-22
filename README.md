@@ -30,3 +30,23 @@ spring.jpa.database=postgresql
 # Ayudará a Spring a realizar y escribir las mejores consultas para adaptarse a nuestra base de datos postgres SQL
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 ````
+
+## [17:12] Create user class
+
+Creamos nuestra clase User agregándole anotaciones de **lombok**, estas anotaciones nos permitirán tener el código
+más limpio.
+
+````java
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    private Integer id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String password;
+}
+````
