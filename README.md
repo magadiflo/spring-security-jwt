@@ -325,3 +325,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 }
 ````
+
+## [44:32] Create the JWT service
+
+Después de verificar el JWT token, debemos llamar al UserDetailsService para verificar si ya tenemos al usuario dentro
+de nuestra base de datos o no. Ahora, para hacer eso debemos llamar a un servicio JWT para extraer el nombre de usuario.
+
+Para este capítulo solo creamos la clase de servicio que usaremos en el JwtAuthenticationFilter:
+
+````java
+
+@Service
+public class JwtService {
+    public String extractUsername(String token) {
+        return null;
+    }
+}
+````
+
+Inyectamos nuestro JwtService en nuestro JwtAuthenticationFilter:
+
+````java
+
+@RequiredArgsConstructor
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    /* omitted code */
+    private final JwtService jwtService;
+
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        /* omitted code */
+        final String userEmail;
+        /* omitted code */
+        jwt = authHeader.substring(7);
+        userEmail = this.jwtService.extractUsername(jwt);
+        LOG.info("jwt obtenido: {}", jwt);
+    }
+}
+````
