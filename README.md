@@ -435,3 +435,23 @@ public class JwtService {
     }
 }
 ````
+
+## [01:00:07] Extract a single claim from JWT
+
+Para poder extraer un claim de JWT usamos una función genérica que entre sus parámetros recibe un tipo **T** y además
+debe retornar un valor del mismo tipo **T**:
+
+````java
+
+@Service
+public class JwtService {
+    /* omitted code */
+
+    public <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = this.extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    /* omitted code */
+}
+````
