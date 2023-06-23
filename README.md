@@ -392,3 +392,25 @@ nuevas dependencias dentro del pom.xml
     </dependency>
 </dependencies>
 ````
+
+## [53:06] Extract claims from JWT
+
+Implementamos un método que nos retorne los claims, para eso es necesario hacer uso de nuestra clave con el que firmamos
+el token, pero eso lo haremos en el siguiente capítulo, por ahora solo retornamos los claims a partir de un token:
+
+````java
+
+@Service
+public class JwtService {
+    /* omitted code */
+    private Claims extractAllClaims(String token) {
+        return Jwts
+                .parserBuilder()
+                .setSigningKey(this.getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+    /* omitted code */
+}
+````
