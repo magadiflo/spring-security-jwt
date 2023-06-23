@@ -525,3 +525,45 @@ Date date = this.extractClaims(token, claims -> claims.getExpiration());
 
 De esta manera vemos que ahora el tipo de dato de retorno del método genérico es de tipo **Date**.
 
+## [01:02:52] Generate the JWT token
+
+Para generar el jwt usamos la librería que agregamos a las dependencias del pom.xml. El primer método para generar el
+token recibe un mapa con información adicional que quisiéramos que nuestro token tenga aparte de los que normalmente
+extrae del userDetails:
+
+````java
+
+@Service
+public class JwtService {
+    /* omitted code */
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        return Jwts.builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 24))) // Expira en 24 horas (en milisegundos)
+                .signWith(this.getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+    /* omitted code */
+}
+````
+
+Qué pasa si ¿no queremos agregar ninguna información adicional al token?, bueno creamos un método que use únicamente
+el userDetails para construir el token, para eso solo reutilizamos el método creado anteriormente:
+
+````java
+
+@Service
+public class JwtService {
+    /* omitted code */
+    public String generateToken(UserDetails userDetails) {
+        return this.generateToken(new HashMap<>(), userDetails);
+    }
+
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        // omitted code
+    }
+    /* omitted code */
+}
+````
