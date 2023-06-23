@@ -455,3 +455,73 @@ public class JwtService {
     /* omitted code */
 }
 ````
+
+## [01:01:51] Extract the username from the token
+
+En el capítulo anterior, solo mostramos la función genérica que creamos, pero no explicamos a profundidad, y pienso que
+es importante hacerlo, ya que recuperamos el username a partir de dicha función genérica. Entonces, es necesario conocer
+exactamente cómo funciona.
+
+En primer lugar, veamos que un **Claims** puede retornar distintos tipos de datos (string, date, etc). A continuación se
+muestra un claims obtenido a partir de un token:
+
+````
+Claims claims = this.extractAllClaims(token);
+
+String subject  = claims.getSubject();
+Date expiration = claims.getExpiration();
+Date issuedAt   = claims.getIssuedAt();
+````
+
+En este capítulo, lo que queremos hacer es retornar un **username o getSubject()** a partir de un claims que ha sido
+construido usando un token. Ahora, qué pasa si más adelante quisiéramos retornar la **fecha de expiración (expiration)**
+y más adelante quizá **la fecha de emisión (issuedAt)**, etc. entonces, para usar un único método que nos retorne el
+tipo de dato deseado del claims es que construimos en el capítulo anterior el método genérico.
+
+**Explicando el método genérico del capítulo anterior**
+
+Decimos que **es un método genérico porque lleva este símbolo** ```<T>```, lo que significa que en algún parámetro del
+método debe estar definido ese tipo de dato ``T``, y si observamos el método genérico el segundo parámetro que es una
+**Function** tiene definido el tipo de dato ``T``. Además, se definió que el tipo de dato que nos debe retornar la
+función genérica tiene que ser del tipo ``T``.
+
+````
+public <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
+}
+````
+
+Nuestra función genérica recibe como primer parámetro un **token** de tipo String, este token se usará internamente para
+obtener un objeto del tipo **Claims**.
+
+````
+final Claims claims = this.extractAllClaims(token);
+````
+
+Ahora, lo que nos retornará nuestra función genérica, será la ejecución de la interfaz funcional **Function** que como
+parámetro de entrada recibe un **claims**, el mismo que se obtuvo en el paso anterior.
+
+````
+return claimsResolver.apply(claims);
+````
+
+Pero, **¿cómo definimos el tipo de dato de retorno de la función genérica?** El tipo de dato de retorno será definido al
+momento de usar nuestra función genérica, por ejemplo: si quiero obtener el username haríamos lo siguiente:
+
+````
+String username = this.extractClaims(token, claims -> claims.getSubject());
+````
+
+De esta manera vemos que el tipo de dato de retorno del método genérico es de tipo **String**, porque la implementación
+de la interfaz funcional **Function** eso es lo que nos está retornando ``claims -> claims.getSubject()``.
+Nótese que el **claims** que usamos en la implementación corresponde al **claims** agregado por parámetro en el método
+**apply(claims)**.
+
+Un ejemplo más, supongamos que ahora necesitamos recuperar la fecha de expiración, entonces usamos nuestro método
+genérico de la siguiente manera:
+
+````
+Date date = this.extractClaims(token, claims -> claims.getExpiration());
+````
+
+De esta manera vemos que ahora el tipo de dato de retorno del método genérico es de tipo **Date**.
+
