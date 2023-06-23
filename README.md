@@ -295,3 +295,33 @@ implementado deberían llevar la anotación **@NonNull**, así que le agregamos 
 **@NonNull**, una anotación común de Spring para declarar que los elementos anotados no pueden ser nulos. Debe usarse en
 el nivel de parámetro, valor devuelto y campo.
 
+## [40:58] Checking the JWT Token
+
+Siguiendo el diagrama que mostramos al inicio de este archivo (diagrama sobre el mecanismo usado para la validación
+de JWT) observamos que lo primero que hacemos dentro del **JWTAuthenticationFilter** es verificar si tenemos el token
+correcto, así que en este apartado implementaremos dicha funcionalidad, **Check JWT token**:
+
+````java
+
+@RequiredArgsConstructor
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            LOG.error("No procesó la solicitud de autenticación porque no pudo encontrar el encabezado " +
+                    "Authorization o el valor del encabezado Authorization no inicia con Bearer .");
+            filterChain.doFilter(request, response);
+            return;
+        }
+        jwt = authHeader.substring(7);
+        LOG.info("jwt obtenido: {}", jwt);
+    }
+}
+````
