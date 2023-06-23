@@ -147,3 +147,103 @@ Para este proyecto, usaremos la primera opción:
 @GeneratedValue
 private Integer id;
 ````
+
+## [25:22] Extend the User to UserDeatils object
+
+Recordemos, que según el libro de
+[**Spring Security In Action 2020**](https://github.com/magadiflo/spring-security-in-action-2020.git) que estudiamos
+previo al desarrollo de este tutorial, nos enseñaba que el **UserDetails es el usuario que Spring Security reconoce
+como tal dentro de su arquitectura**, es decir, el usuario con el que interactuará en diversos procesos, como la
+autenticación, autorización, etc. Además, en el libro nos enseñaba a separar las responsabilidades, es decir, tener
+una **Entity User**, para poder almacenar sus datos en la base de datos, eso incluiría atributos dependiendo de la
+lógica de negocio, así como los clásicos atributos de todo User (username, password, roles, etc.) y una clase
+**SecurityUser**, correspondiente a un **usuario que spring security reconoce dentro de su arquitectura**, es decir, una
+clase que implemente el UserDetails. Luego, esta clase SecurityUser recibía por constructor la entity User, para que
+internamente los métodos sobreescritos del UserDetails hagan uso de los atributos de la entity User. De esta forma,
+separamos las responsabilidades: un **usuario como Entity** de un **usuario reconocido dentro de la arquitectura de
+Spring Security**.
+
+Luego de haber recordado cómo se trabajó en el libro de Spring Security In Action 2020, regresemos a este tutorial.
+En este tutorial, no se separan las responsabilidades, es decir, se usa la misma clase de entidad User y se implementa
+la interfaz UserDetails para convertirlo en un usuario reconocido dentro de la arquitectura de Spring Security. Esta
+sería otra forma de trabajar, aunque en lo personal, me gusta más la idea de separar las responsabilidades, pero
+en este caso, seguiremos tal como se está desarrollando en el tutorial.
+
+Otro punto a observar es que anteriormente no definimos ningún rol o autoridad para la Entity User, es importante tener
+este campo, ya que en la arquitectura de Spring Security, se busca que el usuario propio de esta arquitectura
+devuelva en su método **getAuthorities()** una lista de roles o authorities asociados. En nuestro caso, cada usuario
+tendrá un único rol: USER o ADMIN. Para eso crearemos un enum Role:
+
+````java
+public enum Role {
+    USER, ADMIN
+}
+````
+
+**NOTA**
+
+> En el libro **Spring Security In Action 2020** también se aborda la diferencia entre **Rol y Authority**. Para
+> resumir, un Rol es más amplio, es decir, un Rol contiene un conjunto de Authorities. **A los Authorities también se
+> les conoce como permisos**. Ahora, el método **getAuthorities()** que sobreescribimos de la interfaz **UserDetails**,
+> no hará una distinción y contendrá, si se da el caso, tanto los roles y authorities. Entonces, **¿dónde se hará la
+> diferencia?**, esta diferencia la observaremos cuando aseguremos los endpoints ya sea usando **hasRole(),
+> hasAnyRole()** o usando **hasAuthority(), hasAnyAuthority()**.
+>
+> Ejm que podríamos usar:<br>
+> **ROLE:** ADMIN, USER, MANAGER, STUDENT<br>
+> **AUTHORITY:** user:read, admin:read, admin:write
+
+Finalmente, nuestra Entity User que ahora implementa la interfaz UserDeatils, no solamente será nuestra Entity User,
+sino que ahora también en un usuario que será reconocido dentro de la arquitectura de Spring Security:
+
+````java
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "users")
+public class User implements UserDetails {
+    @Id
+    @GeneratedValue
+    private Integer id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(this.role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}
+````
