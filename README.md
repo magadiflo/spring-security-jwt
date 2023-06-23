@@ -366,3 +366,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 }
 ````
+
+## [47:56] Add the JJWT Dependencies
+
+Para poder manipular el JWT Token, ya sea extrayendo información de él, o validándolo, etc... necesitamos incluir
+nuevas dependencias dentro del pom.xml
+
+````xml
+
+<dependencies>
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+</dependencies>
+````
