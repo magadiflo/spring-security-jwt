@@ -247,3 +247,14 @@ public class User implements UserDetails {
     }
 }
 ````
+
+## [33:32] Create the user repository
+
+Creamos el repositorio **UserRepository** para realizar las operaciones con nuestra entity User y la base de datos,
+además definimos un método personalizado para poder recuperar un entity User de la base de datos a partir de un email:
+
+````java
+public interface UserRepository extends JpaRepository<User, Integer> {
+    Optional<User> findByEmail(String email);
+}
+````
