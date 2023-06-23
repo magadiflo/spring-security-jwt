@@ -91,7 +91,7 @@ datos en particular. En nuestro caso, como estamos usando **Postgresql** y tenie
 (que por defecto es AUTO si no le especificamos otro valor) en la clave primaria, al ejecutar el proyecto **nos creará
 la tabla users y una secuencia** pudiéndolos observar en la consola de esta manera:
 
-````roomsql
+````
 create sequence users_seq start with 1 increment by 50
 
 create table users (
@@ -258,3 +258,40 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
 }
 ````
+
+## [35:50] Create the JWT authentication filter
+
+Recordemos cuáles son los componentes principales en el proceso de autenticación que vimos en el libro de
+**Spring Security In Action**:
+
+![02.Main-components-authentication-spring-security.png](./assets/02.Main-components-authentication-spring-security.png)
+
+Fijémonos en el primer componente, el **Authentication Filter**, este componente se encargará de interceptar todas las
+solicitudes provenientes del cliente.
+
+En este apartado **crearemos un Authentication Filter** personalizado al que le llamaremos **JwtAuthenticationFilter**
+y será nuestro Filtro de Autenticación que configuraremos más adelante para que sea nuestro primer componente en el
+proceso de autenticación de Spring Security.
+
+Nuestra estructura inicial del **JwtAuthenticationFilter** quedaría así:
+
+````java
+
+@RequiredArgsConstructor
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+    }
+}
+````
+
+Cuando extendemos la clase abstracta **OncePerRequestFilter**, implementamos su método abstracto **doFilterInternal**
+y como estamos trabajando con IntelliJ IDEA, este nos lanza un warning sugiriéndonos que los parámetros del método
+implementado deberían llevar la anotación **@NonNull**, así que le agregamos dicha anotación a cada parámetro.
+
+**@NonNull**, una anotación común de Spring para declarar que los elementos anotados no pueden ser nulos. Debe usarse en
+el nivel de parámetro, valor devuelto y campo.
+
