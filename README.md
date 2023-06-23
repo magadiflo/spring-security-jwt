@@ -414,3 +414,24 @@ public class JwtService {
     /* omitted code */
 }
 ````
+
+## [55:23] Implement the getSignInKey method
+
+Temporalmente, dejaremos la clave en este archivo, posteriormente lo agregaremos en el application.properties. Ahora, lo
+que hacemos en este capítulo es definir la clave que usaremos para poder firmar los tokens que vayamos a crear o
+poder comprobar que un token retornado tenga la misma firma con el que se generó:
+
+````java
+
+@Service
+public class JwtService {
+    private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
+
+    /* omitted code */
+
+    private Key getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+}
+````
