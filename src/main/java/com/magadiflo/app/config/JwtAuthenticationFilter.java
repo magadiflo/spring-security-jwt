@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,6 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -34,6 +38,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         jwt = authHeader.substring(7);
         userEmail = this.jwtService.extractUsername(jwt);
-        LOG.info("jwt obtenido: {}", jwt);
+        LOG.info("username: {}, jwt: {}", userEmail, jwt);
+
+        // Verificamos que el userEmail no sea nulo y que el usuario no esté autenticado
+        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+        }
     }
 }

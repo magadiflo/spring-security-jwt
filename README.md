@@ -593,3 +593,30 @@ public class JwtService {
     /* omitted code */
 }
 ````
+
+## [01:11:22] Check the User existence in the database (JwtAuthFilter)
+
+Regresamos a nuestro JwtAuthenticationFilter y continuamos en el código donde nos quedamos, esta vez **verificando que
+el userEmail no sea nulo y que el usuario no esté autenticado** para proceder a buscar el usuario en la base de datos.
+Para eso necesitamos usar la interfaz UserDetailsService y llamar a su método **loadUserByUsername(userEmail);**, en
+el siguiente capítulo realizamos nuestra propia implementación de dicha interfaz, por ahora quedaría así el código:
+
+````java
+
+@RequiredArgsConstructor
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    /* omitted code */
+    private final UserDetailsService userDetailsService;
+
+    /* omitted code */
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        /* omitted code */
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+        }
+    }
+}
+````
