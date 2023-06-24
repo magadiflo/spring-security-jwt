@@ -1016,3 +1016,69 @@ public class AuthenticationService {
     /* omitted code */
 }
 ````
+
+## [01:49:28] Implement the authenticate method
+
+Recordemos que el **@Bean AuthenticationManager** que expusimos en el archivo de configuración **ApplicationConfig**
+tiene un método llamado **authenticate(...)** que nos permite autenticar un usuario basado en el nombre de usuario
+y su contraseña, por lo que ahora necesitamos hacer una inyección de dependencia del **AuthenticationManager** en
+nuestra clase de servicio **AuthenticationService** para usar dicho método.
+
+El método recibe un objeto del tipo **UsernamePasswordAuthenticationToken** pasándole por parámetro el nombre de
+usuario y su contraseña
+
+**NOTA**
+
+> Recordar que en este proceso de login estamos usando el constructor del UsernamePasswordAuthenticationToken que recibe
+> dos parámetros, eso significa que este objeto aún no está autenticado, sino que va a iniciar un proceso de
+> autenticación, por lo tanto, internamente se asigna un **setAuthenticated(false)**. En consecuencia, usamos el
+> constructor con dos parámetros cuando construimos inicialmente el objeto de autenticación y aún no está autenticado
+>
+> Ahora, recordemos que en el **JwtAuthenticationFilter** realizamos la autenticación del usuario basado en el JWT que
+> nos proporciona, una vez que verificamos que el token es válido, para autenticar al usuario creamos un objeto de la
+> clase **UsernamePasswordAuthenticationToken** pero con el constructor de 3 parámetros: principal, credentials y los
+> authorities. Este objeto creado, a diferencia del anterior, internamente se asigna un
+> **super.setAuthenticated(true)** lo que significa que el usuario será registrado como un usuario autenticado.
+
+Posteriormente, el objeto **UsernamePasswordAuthenticationToken** se le pasa al **AuthenticationManager** quien hará
+todo el trabajo por nosotros, si el usuario o contraseña no son correctas, lanzará una excepción.
+
+````
+UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+this.authenticationManager.authenticate(authenticationToken);
+````
+
+Si luego de ejecutar las dos líneas anteriores, no se produce ninguna excepción, eso significa que el usuario está
+autenticado, pues se le pasó el username y el password correctos, así que ahora solo necesitamos generar el token
+y enviarlo devuelta.
+
+````
+User user = this.userRepository.findByEmail(request.getEmail()).orElseThrow();
+String jwtToken = this.jwtService.generateToken(user);
+return AuthenticationResponse.builder().token(jwtToken).build();
+````
+
+La clase de servicio solo con el método de autenticación sería:
+
+````java
+
+@RequiredArgsConstructor
+@Service
+public class AuthenticationService {
+
+    /* omitted code */
+    private final AuthenticationManager authenticationManager;
+
+    /* omitted code */
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+        this.authenticationManager.authenticate(authenticationToken);
+
+        // Si se llega a este punto (no lanzó excepción) significa que la autenticación fue exitosa
+        User user = this.userRepository.findByEmail(request.getEmail()).orElseThrow();
+        String jwtToken = this.jwtService.generateToken(user);
+        return AuthenticationResponse.builder().token(jwtToken).build();
+    }
+}
+````
