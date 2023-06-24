@@ -773,3 +773,51 @@ public class SecurityConfig {
     }
 }
 ````
+
+## [01:32:51] Create the authentication provider bean
+
+En el código anterior definimos dos propiedades finales que serán inyectadas mediante **inyección de dependencias**.
+Por un lado tenemos la clase **JwtAuthenticationFilter** que ya construimos en capítulos anteriores, y, por otro lado,
+nos falta implementar un **AuthenticationProvider**. Entonces, para poder implementar este **AuthenticationProvider**
+nos vamos a la clase de configuración **ApplicationConfig** y definimos su implementación a través de la exposición
+de un **@Bean**.
+
+Spring Security ofrece varias implementación de un AuthenticationProvider, nosotros usaremos una de esas
+implementaciones, el **DaoAuthenticationProvider**.
+
+Recordar que cuando vimos en el libro de **Spring Security In Action 2020**, en los componentes principales del proceso
+de autenticación, uno de esos componentes era el **Authentication Provider**, el cual definía la lógica de
+autenticación. Este Authentication Provider para encontrar al usuario usa el **UserDetailsService** y para verificar
+la contraseña usa el **passwordEncoder**.
+
+De lo dicho anteriormente, es que realizaremos la implementación del **AuthenticationProvider** configurándole los
+dos elementos descritos: **UserDetailsService y el PasswordEncoder**:
+
+````java
+
+@RequiredArgsConstructor
+@Configuration
+public class ApplicationConfig {
+
+    private final UserRepository userRepository;
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> this.userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username no encontrado: " + username));
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(this.userDetailsService());
+        authenticationProvider.setPasswordEncoder(this.passwordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+````
