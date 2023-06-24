@@ -620,3 +620,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 }
 ````
+
+## [01:15:13] Implement the UserDetailsService
+
+En este punto, necesitamos crear un **bean** del tipo **UserDetailsService** o crear una clase que implemente el
+**UserDetailsService** anotándolo con @Service o con @Component para que se convierta en un **bean administrado por
+Spring**:
+
+````java
+
+@RequiredArgsConstructor
+@Configuration
+public class ApplicationConfig {
+
+    private final UserRepository userRepository;
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> this.userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username no encontrado: " + username));
+    }
+}
+````
