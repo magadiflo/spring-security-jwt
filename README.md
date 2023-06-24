@@ -943,3 +943,45 @@ public class AuthenticationRequest {
     private String password;
 }
 ````
+
+## [01:43:22] Create the authentication service
+
+Nuestro controlador **AuthenticationController** recibirá las solicitudes para **registrarse** y hacer **login**, luego
+usará una clase de servicio para poder implementar la lógica correspondiente:
+
+````java
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping(path = "/api/v1/auth")
+public class AuthenticationController {
+
+    private final AuthenticationService authenticationService;
+
+    @PostMapping(path = "/register")
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(this.authenticationService.register(request));
+    }
+
+    @PostMapping(path = "/authenticate")
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+        return ResponseEntity.ok(this.authenticationService.authenticate(request));
+    }
+}
+````
+
+````java
+
+@RequiredArgsConstructor
+@Service
+public class AuthenticationService {
+
+    public AuthenticationResponse register(RegisterRequest request) {
+        return null;
+    }
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        return null;
+    }
+}
+````
