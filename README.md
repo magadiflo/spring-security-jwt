@@ -1130,3 +1130,55 @@ public class DemoController {
     }
 }
 ````
+
+## [01:54:55] Test the changes
+
+Accediendo al endpoint del controlador demo sin enviar token de autenticación:
+
+````bash
+curl -v http://localhost:8080/api/v1/demo-controller
+
+--- Response ---
+>
+< HTTP/1.1 403
+<
+* Connection #0 to host localhost left intact
+````
+
+Autenticándonos sin estar registrados en la Base de Datos:
+
+````bash
+curl -v -X POST -H "Content-Type: application/json" -d "{\"email\": \"pepito@gmail.com\", \"password\": \"12345\"}" http://localhost:8080/api/v1/auth/authenticate
+
+--- Response ---
+>
+< HTTP/1.1 403
+<
+* Connection #0 to host localhost left intact
+````
+
+Registrándonos para ser un usuario del sistema:
+
+````bash
+curl -v -X POST -H "Content-Type: application/json" -d "{\"firstName\": \"Pepito\", \"lastName\": \"Pinto\", \"email\": \"pepito@gmail.com\", \"password\": \"12345\"}" http://localhost:8080/api/v1/auth/register
+
+--- Response ---
+>
+< HTTP/1.1 200
+<
+{ 
+  "token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwZXBpdG9AZ21haWwuY29tIiwiaWF0IjoxNjg3NjMxMjY5LCJleHAiOjE2ODc3MTc2Njl9.ERWS895TF3Ot3tuHRIfyScHNgQeges36YNIoQehw6ag"
+}
+````
+
+Accediendo al controlador Demo enviándole nuestro token de autenticación:
+
+````bash
+curl -v -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwZXBpdG9AZ21haWwuY29tIiwiaWF0IjoxNjg3NjMxMjY5LCJleHAiOjE2ODc3MTc2Njl9.ERWS895TF3Ot3tuHRIfyScHNgQeges36YNIoQehw6ag" http://localhost:8080/api/v1/demo-controller
+
+--- Response ---
+>
+< HTTP/1.1 200
+<
+Hello from secured endpoint
+````
