@@ -927,3 +927,19 @@ public class RegisterRequest {
     private String password;
 }
 ````
+
+## [01:42:50] Create the authentication request class
+
+Clase que contendrá las credenciales enviadas desde el cliente al endpoint:
+
+````java
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AuthenticationRequest {
+    private String email;
+    private String password;
+}
+````
