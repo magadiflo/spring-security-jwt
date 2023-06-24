@@ -821,3 +821,51 @@ public class ApplicationConfig {
     }
 }
 ````
+
+## [01:36:41] Create the authentication manager bean
+
+Se necesita un paso más para poder finalizar la clase de configuración del capítulo anterior, que es definir el
+**Authentication Manager**. El authentication manager es el responsable de administrar la autenticación.
+
+Como recordaremos del libro de **Spring Security In Action 2020** uno de los elementos en el proceso de autenticación
+es el **Authentication Manager** cuya responsabilidad es administrar el proceso de autenticación, y para esto el
+Authentication Manager usa el **Authentication Provider**, por lo que anteriormente ya configuramos un
+Authentication Provider, y ahora solo basta configurar el AuthenticationManager.
+
+Para definir un **Authentication Manager** solo usamos el que Spring Boot proporciona por defecto, para eso hacemos una
+inyección de dependencia del **AuthenticationConfiguration** a través del parámetro del método y lo usamos para poder
+retornar la información sobre el **AuthenticationManager**.
+
+````java
+
+@RequiredArgsConstructor
+@Configuration
+public class ApplicationConfig {
+
+    private final UserRepository userRepository;
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> this.userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username no encontrado: " + username));
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(this.userDetailsService());
+        authenticationProvider.setPasswordEncoder(this.passwordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+````
