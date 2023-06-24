@@ -642,3 +642,90 @@ public class ApplicationConfig {
     }
 }
 ````
+
+## [01:19:38] Update the SecurityContextHolder and finalice the filter
+
+Continuamos con la implementación del JwtAuthenticationFilter. Usamos los métodos creados en nuestra clase JwtService
+para verificar si el token es válido. **Si el usuario es válido, entonces debemos actualizar el SecurityContext** y
+enviar la solicitud a nuestro dispatcherServlet.
+
+**Para actualizar el SecurityContext**, necesitamos crear un objeto que implemente la interfaz **Authentication**.
+Spring cuenta con una clase que implementa el **Authentication** y será el que usaremos para crear el objeto de
+autenticación, esta clase es **UsernamePasswordAuthenticationToken**, luego usaremos el objeto creado para actualizar
+el SecurityContext:
+
+````java
+
+@RequiredArgsConstructor
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    /* omitted code */
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        /* omitted code */
+
+        // Verificamos que el userEmail no sea nulo y que el usuario no esté autenticado
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if (this.jwtService.isTokenValid(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                // Ampliamos o reforzamos este UsernamePasswordAuthenticationToken con los detalles de nuestra solicitud
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                //Actualizamos el contexto de seguridad
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+        }
+        filterChain.doFilter(request, response);
+    }
+}
+````
+
+Finalmente, la clase completa de nuestro JwtAuthenticationFilter quedaría así:
+
+````java
+
+@RequiredArgsConstructor
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String userEmail;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            LOG.error("No procesó la solicitud de autenticación porque no pudo encontrar el encabezado " +
+                    "Authorization o el valor del encabezado Authorization no inicia con Bearer .");
+            filterChain.doFilter(request, response);
+            return;
+        }
+        jwt = authHeader.substring(7);
+        userEmail = this.jwtService.extractUsername(jwt);
+        LOG.info("username: {}, jwt: {}", userEmail, jwt);
+
+        // Verificamos que el userEmail no sea nulo y que el usuario no esté autenticado
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if (this.jwtService.isTokenValid(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                // Ampliamos o reforzamos este UsernamePasswordAuthenticationToken con los detalles de nuestra solicitud
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                //Actualizamos el contexto de seguridad
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+        }
+        filterChain.doFilter(request, response);
+    }
+}
+````
