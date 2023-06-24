@@ -869,3 +869,28 @@ public class ApplicationConfig {
     }
 }
 ````
+
+## [01:38:14] Create the authentication controller
+
+Crearemos un controlador con dos métodos handler, uno para **registrarnos y otro para hacer login**. Por ahora crearemos
+solo la estructura de nuestro controlador, posteriormente lo implementaremos:
+
+````java
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping(path = "/api/v1/auth")
+public class AuthenticationController {
+    @PostMapping(path = "/register")
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
+        //TODO implementar registro
+        return null;
+    }
+
+    @PostMapping(path = "/authenticate")
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+        //TODO implementar login
+        return null;
+    }
+}
+````
