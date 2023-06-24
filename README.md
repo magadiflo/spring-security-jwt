@@ -910,3 +910,20 @@ public class AuthenticationResponse {
 }
 ````
 
+## [01:41:47] Create the register request object
+
+Creamos la clase **RegisterRequest** que contendrán los datos que el cliente envíe a nuestro endpoint:
+
+````java
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class RegisterRequest {
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String password;
+}
+````
