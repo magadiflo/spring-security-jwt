@@ -1182,3 +1182,13 @@ curl -v -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwZXBpdG9AZ21ha
 <
 Hello from secured endpoint
 ````
+
+## NOTA FINAL
+
+En este proyecto, si un usuario accede a un endpoint sin autenticarse lanza un **403 Forbidden** cuando en realidad
+debería lanzar un **401 Unauthorized**, incluso si intentamos autenticarnos con credenciales incorrectas al endpoint
+para hacer login lanza el **403 Forbidden** cuando también debería lanzar el **401 Unauthorized**. Recordar que el
+error **403 Forbidden** deben lanzarse cuando un usuario está autenticado en la aplicación, es decir, es un usuario
+reconocido dentro del sistema pero **no tiene permiso para acceder a cierto recurso**.
+
+Tener en cuenta ese punto para cuando se trata de tomar como referencia este proyecto.
