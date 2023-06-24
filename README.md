@@ -729,3 +729,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 }
 ````
+
+## [01:23:53] Add the security configuration
+
+Crearemos una clase que será nuestra **clase principal de configuración de Spring Security**, esta clase tendrá las
+anotaciones **@Configuration y @EnableWebSecurity** siempre juntas. La anotación **@Configuration** como sabemos es un
+estereotipo de @Component y sirve para definir que la clase será una clase de configuración. La anotación
+**@EnableWebSecurity**, nos permite crear una clase de seguridad personalizada. Esta anotación se coloca en una clase de
+configuración de Spring y le indica al framework que configure automáticamente la seguridad web en el proyecto. Al
+colocar @EnableWebSecurity en una clase de configuración, Spring Security activa la integración con Spring MVC y
+establece una serie de configuraciones por defecto para proteger los endpoints de la aplicación web.
+
+El SecurityFilterChain es el bean responsable de configurar toda la seguridad HTTP de nuestra aplicación.
+
+**NOTA**
+> Como ahora estoy usando Spring Security 6.1.1 dentro de Spring Boot 3.1.1, la configuración tiende a ser algo
+> distinta al del video, pese a que también está usando Spring Boot 3.0.0
+
+Nuestra clase de configuración quedaría de la siguiente manera:
+
+````java
+
+@RequiredArgsConstructor
+@EnableWebSecurity
+@Configuration
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationProvider authenticationProvider;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> {
+                    authorize.requestMatchers("").permitAll()
+                            .anyRequest().authenticated();
+                })
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(this.authenticationProvider)
+                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+}
+````
