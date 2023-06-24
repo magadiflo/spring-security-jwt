@@ -567,3 +567,29 @@ public class JwtService {
     /* omitted code */
 }
 ````
+
+## [01:08:15] Check if the token is valid
+
+Verificamos si el token es válido, para eso validamos si el nombre de usuario dentro del token es igual al usuario
+contenido en el UserDetails y además si el token no ha expirado:
+
+````java
+
+@Service
+public class JwtService {
+    /* omitted code */
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = this.extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !this.isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return this.extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return this.extractClaims(token, Claims::getExpiration);
+    }
+    /* omitted code */
+}
+````
