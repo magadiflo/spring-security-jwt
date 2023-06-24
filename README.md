@@ -1082,3 +1082,36 @@ public class AuthenticationService {
     }
 }
 ````
+
+## [01:52:17] Update the security configuration whitelist
+
+En nuestra clase de configuración de spring security definimos el acceso permitido a los endpoints de nuestro register y
+authenticate:
+
+````java
+
+@RequiredArgsConstructor
+@EnableWebSecurity
+@Configuration
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationProvider authenticationProvider;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> {
+                    authorize.requestMatchers("/api/v1/auth/**").permitAll()
+                            .anyRequest().authenticated();
+                })
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(this.authenticationProvider)
+                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+}
+````
+
