@@ -1115,3 +1115,18 @@ public class SecurityConfig {
 }
 ````
 
+## [01:53:35] Create a demo controller
+
+Creamos un controlador para probar la seguridad que hemos creado:
+
+````java
+
+@RestController
+@RequestMapping(path = "/api/v1/demo-controller")
+public class DemoController {
+    @GetMapping
+    public ResponseEntity<String> sayHello() {
+        return ResponseEntity.ok("Hello from secured endpoint");
+    }
+}
+````
