@@ -894,3 +894,19 @@ public class AuthenticationController {
     }
 }
 ````
+
+## [01:40:55] Create the authentication response class
+
+Crearemos la clase que será la respuesta que enviaremos al cliente:
+
+````java
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AuthenticationResponse {
+    private String token;
+}
+````
+
